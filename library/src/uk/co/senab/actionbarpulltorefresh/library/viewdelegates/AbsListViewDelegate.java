@@ -21,6 +21,8 @@ import android.os.Build;
 import android.view.View;
 import android.widget.AbsListView;
 
+import uk.co.senab.actionbarpulltorefresh.library.sdk.Compat;
+
 /**
  * FIXME
  */
@@ -59,8 +61,7 @@ public class AbsListViewDelegate implements ViewDelegate {
 
     @Override
     public boolean isReadyForPullUp(View view, float x, float y) {
-        //TODO Don't need to deal with this yet.
-        return !view.canScrollVertically(1);
+        return !uk.co.senab.actionbarpulltorefresh.library.sdk.Compat.canScrollVertically(view, 1);
     }
 
     int getVerticalScrollbarPosition(AbsListView absListView) {

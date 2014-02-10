@@ -19,6 +19,8 @@ package uk.co.senab.actionbarpulltorefresh.library.viewdelegates;
 import android.view.View;
 import android.webkit.WebView;
 
+import uk.co.senab.actionbarpulltorefresh.library.sdk.Compat;
+
 /**
  * FIXME
  */
@@ -33,6 +35,6 @@ public class WebViewDelegate implements ViewDelegate {
 
     @Override
     public boolean isReadyForPullUp(View view, float x, float y) {
-        return !view.canScrollVertically(1);
+        return !Compat.canScrollVertically(view, 1);
     }
 }

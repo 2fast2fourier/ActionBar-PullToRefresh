@@ -12,4 +12,8 @@ class CompatBase {
         view.postDelayed(runnable, 10l);
     }
 
+    public static boolean canScrollVertically(View view, int direction) {
+        //TODO not implemented yet
+        return false;
+    }
 }

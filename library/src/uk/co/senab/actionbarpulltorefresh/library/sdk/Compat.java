@@ -23,4 +23,12 @@ public class Compat {
         }
     }
 
+    public static boolean canScrollVertically(View view, int direction){
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH){
+            return CompatBase.canScrollVertically(view, direction);
+        }else{
+            return CompatV14.canScrollVertically(view, direction);
+        }
+    }
+
 }

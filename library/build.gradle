@@ -20,6 +20,8 @@ android {
             res.srcDirs = ['res']
         }
     }
-}
 
-apply from: 'https://raw.github.com/chrisbanes/gradle-mvn-push/master/gradle-mvn-push.gradle'
+    lintOptions {
+        disable 'NewApi'
+    }
+}
