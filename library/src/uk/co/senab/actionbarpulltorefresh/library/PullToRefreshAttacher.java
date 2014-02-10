@@ -35,6 +35,7 @@ import android.view.WindowManager;
 import java.util.WeakHashMap;
 
 import uk.co.senab.actionbarpulltorefresh.library.listeners.HeaderViewListener;
+import uk.co.senab.actionbarpulltorefresh.library.listeners.OnPullFromBottomListener;
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 import uk.co.senab.actionbarpulltorefresh.library.viewdelegates.ViewDelegate;
 
@@ -49,6 +50,7 @@ public class PullToRefreshAttacher {
     private HeaderTransformer mHeaderTransformer;
 
     private OnRefreshListener mOnRefreshListener;
+    private OnPullFromBottomListener mOnPullFromBottomListener;
 
     private Activity mActivity;
     private View mHeaderView;
@@ -59,7 +61,7 @@ public class PullToRefreshAttacher {
 
     private float mInitialMotionY, mLastMotionY, mPullBeginY;
     private float mInitialMotionX;
-    private boolean mIsBeingDragged, mIsRefreshing, mHandlingTouchEventFromDown;
+    private boolean mIsBeingDragged, mIsRefreshing, mHandlingTouchEventFromDown, mCurrentPullIsUp = false, mCanPullDown = false, mCanPullUp = false;
     private View mViewBeingDragged;
 
     private final WeakHashMap<View, ViewDelegate> mRefreshableViews;
@@ -217,6 +219,10 @@ public class PullToRefreshAttacher {
         mOnRefreshListener = listener;
     }
 
+    void setOnPullFromBottomListener(OnPullFromBottomListener listener){
+        mOnPullFromBottomListener = listener;
+    }
+
     void destroy() {
         if (mIsDestroyed) return; // We've already been destroyed
 
@@ -277,12 +283,20 @@ public class PullToRefreshAttacher {
                 // scrolled enough
                 if (!mIsBeingDragged && mInitialMotionY > 0f) {
                     final float yDiff = y - mInitialMotionY;
+                    final float yUpDiff = mInitialMotionY - y;
                     final float xDiff = x - mInitialMotionX;
 
-                    if (yDiff > xDiff && yDiff > mTouchSlop) {
+                    if (mCanPullDown && yDiff > xDiff && yDiff > mTouchSlop) {
                         mIsBeingDragged = true;
+                        mCurrentPullIsUp = false;
+                        mLastMotionY = mInitialMotionY;
                         onPullStarted(y);
-                    } else if (yDiff < -mTouchSlop) {
+                    } else if (mCanPullUp && yUpDiff > xDiff && yUpDiff > mTouchSlop) {
+                        mIsBeingDragged = true;
+                        mCurrentPullIsUp = true;
+                        mLastMotionY = mInitialMotionY;
+                        onPullStarted(y);
+                    } else if ((!mCanPullUp && yDiff < -mTouchSlop) || (!mCanPullDown && yUpDiff < -mTouchSlop)) {
                         resetTouch();
                     }
                 }
@@ -330,7 +344,14 @@ public class PullToRefreshAttacher {
                 ViewDelegate delegate = mRefreshableViews.get(view);
                 if (delegate != null) {
                     // Now call the delegate, converting the X/Y into the View's co-ordinate system
-                    return delegate.isReadyForPull(view, rawX - mRect.left, rawY - mRect.top);
+                    if(mOnPullFromBottomListener != null){
+                        mCanPullUp = delegate.isReadyForPullUp(view, rawX - mRect.left, rawY - mRect.top);
+                        mCanPullDown = delegate.isReadyForPull(view, rawX - mRect.left, rawY - mRect.top);
+                        return mCanPullUp || mCanPullDown;
+                    }else{
+                        mCanPullDown = delegate.isReadyForPull(view, rawX - mRect.left, rawY - mRect.top);
+                        return mCanPullDown;
+                    }
                 }
             }
         }
@@ -368,7 +389,7 @@ public class PullToRefreshAttacher {
                 final float y = event.getY();
 
                 if (mIsBeingDragged && y != mLastMotionY) {
-                    final float yDx = y - mLastMotionY;
+                    final float yDx = mCurrentPullIsUp ? mLastMotionY - y : y - mLastMotionY;
 
                     /**
                      * Check to see if the user is scrolling the right direction
@@ -416,6 +437,7 @@ public class PullToRefreshAttacher {
     void resetTouch() {
         mIsBeingDragged = false;
         mHandlingTouchEventFromDown = false;
+        mCurrentPullIsUp = false;
         mInitialMotionY = mLastMotionY = mPullBeginY = -1f;
     }
 
@@ -433,7 +455,7 @@ public class PullToRefreshAttacher {
         }
 
         final float pxScrollForRefresh = getScrollNeededForRefresh(view);
-        final float scrollLength = y - mPullBeginY;
+        final float scrollLength = mCurrentPullIsUp ? mPullBeginY - y : y - mPullBeginY;
 
         if (scrollLength < pxScrollForRefresh) {
             mHeaderTransformer.onPulled(scrollLength / pxScrollForRefresh);

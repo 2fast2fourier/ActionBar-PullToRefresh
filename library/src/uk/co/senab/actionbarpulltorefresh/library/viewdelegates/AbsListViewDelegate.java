@@ -57,6 +57,12 @@ public class AbsListViewDelegate implements ViewDelegate {
         return ready;
     }
 
+    @Override
+    public boolean isReadyForPullUp(View view, float x, float y) {
+        //TODO Don't need to deal with this yet.
+        return !view.canScrollVertically(1);
+    }
+
     int getVerticalScrollbarPosition(AbsListView absListView) {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB ?
                 CompatV11.getVerticalScrollbarPosition(absListView) :

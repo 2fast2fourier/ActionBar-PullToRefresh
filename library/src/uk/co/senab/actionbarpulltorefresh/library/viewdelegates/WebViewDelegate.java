@@ -30,4 +30,9 @@ public class WebViewDelegate implements ViewDelegate {
     public boolean isReadyForPull(View view, float x, float y) {
         return view.getScrollY() <= 0;
     }
+
+    @Override
+    public boolean isReadyForPullUp(View view, float x, float y) {
+        return !view.canScrollVertically(1);
+    }
 }
