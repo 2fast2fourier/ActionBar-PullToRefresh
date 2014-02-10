@@ -437,7 +437,6 @@ public class PullToRefreshAttacher {
     void resetTouch() {
         mIsBeingDragged = false;
         mHandlingTouchEventFromDown = false;
-        mCurrentPullIsUp = false;
         mInitialMotionY = mLastMotionY = mPullBeginY = -1f;
     }
 
@@ -557,7 +556,7 @@ public class PullToRefreshAttacher {
      *         started.
      */
     private boolean canRefresh(boolean fromTouch) {
-        return !mIsRefreshing && (!fromTouch || mOnRefreshListener != null);
+        return !mIsRefreshing && (!fromTouch || mOnRefreshListener != null || mOnPullFromBottomListener != null);
     }
 
     private float getScrollNeededForRefresh(View view) {
@@ -583,8 +582,10 @@ public class PullToRefreshAttacher {
 
         // Call OnRefreshListener if this call has originated from a touch event
         if (fromTouch) {
-            if (mOnRefreshListener != null) {
+            if (!mCurrentPullIsUp && mOnRefreshListener != null) {
                 mOnRefreshListener.onRefreshStarted(view);
+            }else if(mCurrentPullIsUp && mOnPullFromBottomListener != null){
+                mOnPullFromBottomListener.onPullFromBottom(view);
             }
         }
 
