@@ -457,10 +457,10 @@ public class PullToRefreshAttacher {
         final float scrollLength = mCurrentPullIsUp ? mPullBeginY - y : y - mPullBeginY;
 
         if (scrollLength < pxScrollForRefresh) {
-            mHeaderTransformer.onPulled(scrollLength / pxScrollForRefresh);
+            mHeaderTransformer.onPulled(scrollLength / pxScrollForRefresh, mCurrentPullIsUp);
         } else {
             if (mRefreshOnUp) {
-                mHeaderTransformer.onReleaseToRefresh();
+                mHeaderTransformer.onReleaseToRefresh(mCurrentPullIsUp);
             } else {
                 setRefreshingInt(view, true, true);
             }

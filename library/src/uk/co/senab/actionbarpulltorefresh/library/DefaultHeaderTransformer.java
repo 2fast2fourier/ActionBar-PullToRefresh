@@ -56,7 +56,7 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
     private TextView mHeaderTextView;
     private SmoothProgressBar mHeaderProgressBar;
 
-    private CharSequence mPullRefreshLabel, mRefreshingLabel, mReleaseLabel;
+    private CharSequence mPullRefreshLabel, mRefreshingLabel, mReleaseLabel, mPullFromBottomRefreshLabel, mPullFromBottomReleaseLabel;
 
     private int mProgressDrawableColor;
 
@@ -66,7 +66,7 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
 
     private final Interpolator mInterpolator = new AccelerateInterpolator();
 
-    protected DefaultHeaderTransformer() {
+    public DefaultHeaderTransformer() {
         final int min = getMinimumApiLevel();
         if (Build.VERSION.SDK_INT < min) {
             throw new IllegalStateException("This HeaderTransformer is designed to run on SDK "
@@ -88,6 +88,10 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
         mPullRefreshLabel = activity.getString(R.string.pull_to_refresh_pull_label);
         mRefreshingLabel = activity.getString(R.string.pull_to_refresh_refreshing_label);
         mReleaseLabel = activity.getString(R.string.pull_to_refresh_release_label);
+
+        // Default Labels to display
+        mPullFromBottomRefreshLabel = activity.getString(R.string.pull_to_refresh_pull_label);
+        mPullFromBottomReleaseLabel = activity.getString(R.string.pull_to_refresh_release_label);
 
         mAnimationDuration = activity.getResources()
                 .getInteger(android.R.integer.config_shortAnimTime);
@@ -135,11 +139,15 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
     }
 
     @Override
-    public void onPulled(float percentagePulled) {
+    public void onPulled(float percentagePulled, boolean pullFromBottom) {
         if (mHeaderProgressBar != null) {
             mHeaderProgressBar.setVisibility(View.VISIBLE);
             final float progress = mInterpolator.getInterpolation(percentagePulled);
             mHeaderProgressBar.setProgress(Math.round(mHeaderProgressBar.getMax() * progress));
+        }
+
+        if (mHeaderTextView != null) {
+            mHeaderTextView.setText(pullFromBottom ? mPullFromBottomRefreshLabel : mPullRefreshLabel);
         }
     }
 
@@ -155,9 +163,9 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
     }
 
     @Override
-    public void onReleaseToRefresh() {
+    public void onReleaseToRefresh(boolean pullFromBottom) {
         if (mHeaderTextView != null) {
-            mHeaderTextView.setText(mReleaseLabel);
+            mHeaderTextView.setText(pullFromBottom ? mPullFromBottomReleaseLabel : mReleaseLabel);
         }
         if (mHeaderProgressBar != null) {
             mHeaderProgressBar.setProgress(mHeaderProgressBar.getMax());
@@ -268,6 +276,18 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
     }
 
     /**
+     * Set Text to show to prompt the user is pull (or keep pulling).
+     *
+     * @param pullText - Text to display.
+     */
+    public void setPullFromBottomText(CharSequence pullText) {
+        mPullFromBottomRefreshLabel = pullText;
+        if (mHeaderTextView != null) {
+            mHeaderTextView.setText(mPullFromBottomRefreshLabel);
+        }
+    }
+
+    /**
      * Set Text to show to tell the user that a refresh is currently in progress.
      *
      * @param refreshingText - Text to display.
@@ -283,6 +303,15 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
      */
     public void setReleaseText(CharSequence releaseText) {
         mReleaseLabel = releaseText;
+    }
+
+    /**
+     * Set Text to show to tell the user has scrolled enough to refresh.
+     *
+     * @param releaseText - Text to display.
+     */
+    public void setPullFromBottomReleaseText(CharSequence releaseText) {
+        mPullFromBottomReleaseLabel = releaseText;
     }
 
     private void setupViewsFromStyles(Activity activity, View headerView) {

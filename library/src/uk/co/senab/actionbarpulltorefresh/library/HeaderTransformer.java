@@ -51,7 +51,7 @@ public abstract class HeaderTransformer {
      * @param percentagePulled value between 0.0f and 1.0f depending on how far the
      *                         user has pulled.
      */
-    public void onPulled(float percentagePulled) {}
+    public void onPulled(float percentagePulled, boolean pullFromBottom) {}
 
     /**
      * Called when a refresh has begun. Theoretically this call is similar
@@ -65,7 +65,7 @@ public abstract class HeaderTransformer {
      * event. This is only called when {@link Options#refreshOnUp} is set to
      * true.
      */
-    public void onReleaseToRefresh() {}
+    public void onReleaseToRefresh(boolean pullFromBottom) {}
 
     /**
      * Called when the current refresh has taken longer than the time
