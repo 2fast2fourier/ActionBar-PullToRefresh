@@ -26,6 +26,7 @@ import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.ClipDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
@@ -36,6 +37,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Interpolator;
+import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -48,6 +50,10 @@ import uk.co.senab.actionbarpulltorefresh.library.sdk.Compat;
  */
 public class DefaultHeaderTransformer extends HeaderTransformer {
 
+    public interface ActionbarColorDelegate{
+        public int getActionbarColor();
+    }
+
     public static final int PROGRESS_BAR_STYLE_INSIDE = 0;
     public static final int PROGRESS_BAR_STYLE_OUTSIDE = 1;
 
@@ -55,6 +61,9 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
     private ViewGroup mContentLayout;
     private TextView mHeaderTextView;
     private SmoothProgressBar mHeaderProgressBar;
+    private boolean headerMoreLikeFooter = false;
+
+    private Activity parentActivity;
 
     private CharSequence mPullRefreshLabel, mRefreshingLabel, mReleaseLabel, mPullFromBottomRefreshLabel, mPullFromBottomReleaseLabel;
 
@@ -65,6 +74,7 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
     private long mAnimationDuration;
     private int mProgressBarStyle;
     private int mProgressBarHeight = RelativeLayout.LayoutParams.WRAP_CONTENT;
+    private int mContentLayoutHeight;
 
     private final Interpolator mInterpolator = new AccelerateInterpolator();
 
@@ -79,6 +89,7 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
 
     @Override
     public void onViewCreated(Activity activity, View headerView) {
+        parentActivity = activity;
         mHeaderView = headerView;
 
         // Get ProgressBar and TextView
@@ -90,6 +101,8 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
         mPullRefreshLabel = activity.getString(R.string.pull_to_refresh_pull_label);
         mRefreshingLabel = activity.getString(R.string.pull_to_refresh_refreshing_label);
         mReleaseLabel = activity.getString(R.string.pull_to_refresh_release_label);
+
+        mContentLayoutHeight = activity.getResources().getDimensionPixelSize(R.dimen.ptr_header_height);
 
         // Default Labels to display
         mPullFromBottomRefreshLabel = activity.getString(R.string.pull_to_refresh_pull_label);
@@ -127,6 +140,10 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
             mHeaderProgressBar.setVisibility(View.VISIBLE);
             mHeaderProgressBar.setProgress(0);
             mHeaderProgressBar.setIndeterminate(false);
+            RelativeLayout.LayoutParams top = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            top.addRule(RelativeLayout.BELOW, R.id.ptr_content);
+            mHeaderProgressBar.setLayoutParams(top);
+            headerMoreLikeFooter = false;
         }
 
         // Reset Text View
@@ -137,6 +154,9 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
 
         // Reset the Content Layout
         if (mContentLayout != null) {
+            RelativeLayout.LayoutParams header = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, mContentLayoutHeight);
+            header.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+            mContentLayout.setLayoutParams(header);
             mContentLayout.setVisibility(View.VISIBLE);
             Compat.setAlpha(mContentLayout, 1f);
         }
@@ -145,6 +165,23 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
     @Override
     public void onPulled(float percentagePulled, boolean pullFromBottom) {
         if (mHeaderProgressBar != null) {
+            if(pullFromBottom && !headerMoreLikeFooter){
+                RelativeLayout.LayoutParams header = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, mContentLayoutHeight);
+                header.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+                mContentLayout.setLayoutParams(header);
+                RelativeLayout.LayoutParams progress = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                progress.addRule(RelativeLayout.ABOVE, R.id.ptr_content);
+                mHeaderProgressBar.setLayoutParams(progress);
+                headerMoreLikeFooter = true;
+            }else if(!pullFromBottom && headerMoreLikeFooter){
+                RelativeLayout.LayoutParams header = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, mContentLayoutHeight);
+                header.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+                mContentLayout.setLayoutParams(header);
+                RelativeLayout.LayoutParams top = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                top.addRule(RelativeLayout.BELOW, R.id.ptr_content);
+                mHeaderProgressBar.setLayoutParams(top);
+                headerMoreLikeFooter = false;
+            }
             mHeaderProgressBar.setVisibility(View.VISIBLE);
             final float progress = mInterpolator.getInterpolation(percentagePulled);
             mHeaderProgressBar.setProgress(Math.round(mHeaderProgressBar.getMax() * progress));
@@ -193,6 +230,9 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
         final boolean changeVis = mHeaderView.getVisibility() != View.VISIBLE;
 
         if (changeVis) {
+            if(parentActivity instanceof ActionbarColorDelegate){
+                mContentLayout.setBackgroundColor(((ActionbarColorDelegate) parentActivity).getActionbarColor());
+            }
             mHeaderView.setVisibility(View.VISIBLE);
             AnimatorSet animSet = new AnimatorSet();
             ObjectAnimator transAnim = ObjectAnimator.ofFloat(mContentLayout, "translationY",
@@ -286,9 +326,6 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
      */
     public void setPullFromBottomText(CharSequence pullText) {
         mPullFromBottomRefreshLabel = pullText;
-        if (mHeaderTextView != null) {
-            mHeaderTextView.setText(mPullFromBottomRefreshLabel);
-        }
     }
 
     /**
@@ -326,6 +363,7 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
         if (mContentLayout != null) {
             final int height = styleAttrs.getDimensionPixelSize(
                     R.styleable.PullToRefreshHeader_ptrHeaderHeight, getActionBarSize(activity));
+            mContentLayoutHeight = height;
             mContentLayout.getLayoutParams().height = height;
             mContentLayout.requestLayout();
         }
@@ -437,6 +475,10 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
     }
 
     protected Drawable getActionBarBackground(Context context) {
+        if(context instanceof ActionbarColorDelegate){
+            return new ColorDrawable(((ActionbarColorDelegate)context).getActionbarColor());
+        }
+
         int[] android_styleable_ActionBar = {android.R.attr.background};
 
         // Now get the action bar style values...
