@@ -60,6 +60,8 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
 
     private int mProgressDrawableColor;
 
+    private int[] mProgressDrawableColorArray;
+
     private long mAnimationDuration;
     private int mProgressBarStyle;
     private int mProgressBarHeight = RelativeLayout.LayoutParams.WRAP_CONTENT;
@@ -98,6 +100,8 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
 
         mProgressDrawableColor = activity.getResources()
                 .getColor(R.color.default_progress_bar_color);
+
+        mProgressDrawableColorArray = activity.getResources().getIntArray(R.array.progress_bar_default_colorarray);
 
         // Setup the View styles
         setupViewsFromStyles(activity, headerView);
@@ -354,6 +358,11 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
                     R.styleable.PullToRefreshHeader_ptrProgressBarColor, mProgressDrawableColor);
         }
 
+        // Retrieve the Progress Bar Color Array from style
+        if (styleAttrs.hasValue(R.styleable.PullToRefreshHeader_ptrProgressBarColorArray)) {
+            mProgressDrawableColorArray = activity.getResources().getIntArray(styleAttrs.getResourceId(R.styleable.PullToRefreshHeader_ptrProgressBarColorArray, R.array.progress_bar_default_colorarray));
+        }
+
         mProgressBarStyle = styleAttrs.getInt(
                 R.styleable.PullToRefreshHeader_ptrProgressBarStyle, PROGRESS_BAR_STYLE_OUTSIDE);
 
@@ -398,11 +407,23 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
             final int strokeWidth = mHeaderProgressBar.getResources()
                     .getDimensionPixelSize(R.dimen.ptr_progress_bar_stroke_width);
 
-            mHeaderProgressBar.setIndeterminateDrawable(
-                    new SmoothProgressDrawable.Builder(mHeaderProgressBar.getContext())
-                            .color(mProgressDrawableColor)
-                            .strokeWidth(strokeWidth)
-                            .build());
+            if(mProgressDrawableColorArray != null){
+                mHeaderProgressBar.setIndeterminateDrawable(
+                        new SmoothProgressDrawable.Builder(mHeaderProgressBar.getContext())
+                                .colors(mProgressDrawableColorArray)
+                                .strokeWidth(strokeWidth)
+                                .sectionsCount(6)
+                                .mirrorMode(true)
+                                .build());
+            }else{
+                mHeaderProgressBar.setIndeterminateDrawable(
+                        new SmoothProgressDrawable.Builder(mHeaderProgressBar.getContext())
+                                .color(mProgressDrawableColor)
+                                .strokeWidth(strokeWidth)
+                                .sectionsCount(6)
+                                .mirrorMode(true)
+                                .build());
+            }
 
             ShapeDrawable shape = new ShapeDrawable();
             shape.setShape(new RectShape());

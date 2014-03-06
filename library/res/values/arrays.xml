@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="progress_bar_default_colorarray">
+        <item>#BEBEBE</item>
+        <item>#3E3E3E</item>
+        <item>#BEBEBE</item>
+        <item>#3E3E3E</item>
+    </array>
+</resources>
