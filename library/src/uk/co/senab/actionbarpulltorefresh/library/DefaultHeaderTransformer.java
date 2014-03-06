@@ -413,6 +413,7 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
                                 .colors(mProgressDrawableColorArray)
                                 .strokeWidth(strokeWidth)
                                 .sectionsCount(6)
+                                .separatorLength(0)
                                 .mirrorMode(true)
                                 .build());
             }else{
@@ -421,6 +422,7 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
                                 .color(mProgressDrawableColor)
                                 .strokeWidth(strokeWidth)
                                 .sectionsCount(6)
+                                .separatorLength(0)
                                 .mirrorMode(true)
                                 .build());
             }
