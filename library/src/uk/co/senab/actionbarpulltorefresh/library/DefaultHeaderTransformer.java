@@ -20,6 +20,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -59,6 +60,7 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
     private CharSequence mPullRefreshLabel, mRefreshingLabel, mReleaseLabel;
 
     private int mProgressDrawableColor;
+    private int[] mProgressDrawableColorArray;
 
     private long mAnimationDuration;
     private int mProgressBarStyle;
@@ -66,7 +68,7 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
 
     private final Interpolator mInterpolator = new AccelerateInterpolator();
 
-    protected DefaultHeaderTransformer() {
+    public DefaultHeaderTransformer() {
         final int min = getMinimumApiLevel();
         if (Build.VERSION.SDK_INT < min) {
             throw new IllegalStateException("This HeaderTransformer is designed to run on SDK "
@@ -164,6 +166,7 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     @Override
     public void onRefreshMinimized() {
         // Here we fade out most of the header, leaving just the progress bar
@@ -176,6 +179,7 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
         return mHeaderView;
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     @Override
     public boolean showHeaderView() {
         final boolean changeVis = mHeaderView.getVisibility() != View.VISIBLE;
@@ -194,6 +198,7 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
         return changeVis;
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     @Override
     public boolean hideHeaderView() {
         final boolean changeVis = mHeaderView.getVisibility() != View.GONE;
@@ -325,6 +330,11 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
                     R.styleable.PullToRefreshHeader_ptrProgressBarColor, mProgressDrawableColor);
         }
 
+        // Retrieve the Progress Bar Color Array from style
+        if (styleAttrs.hasValue(R.styleable.PullToRefreshHeader_ptrProgressBarColorArray)) {
+            mProgressDrawableColorArray = activity.getResources().getIntArray(styleAttrs.getResourceId(R.styleable.PullToRefreshHeader_ptrProgressBarColorArray, R.array.progress_bar_default_colorarray));
+        }
+
         mProgressBarStyle = styleAttrs.getInt(
                 R.styleable.PullToRefreshHeader_ptrProgressBarStyle, PROGRESS_BAR_STYLE_OUTSIDE);
 
@@ -369,11 +379,23 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
             final int strokeWidth = mHeaderProgressBar.getResources()
                     .getDimensionPixelSize(R.dimen.ptr_progress_bar_stroke_width);
 
-            mHeaderProgressBar.setIndeterminateDrawable(
-                    new SmoothProgressDrawable.Builder(mHeaderProgressBar.getContext())
-                            .color(mProgressDrawableColor)
-                            .width(strokeWidth)
-                            .build());
+            if(mProgressDrawableColorArray != null){
+                mHeaderProgressBar.setIndeterminateDrawable(
+                        new SmoothProgressDrawable.Builder(mHeaderProgressBar.getContext())
+                                .colors(mProgressDrawableColorArray)
+                                .sectionsCount(6)
+                                .separatorLength(0)
+                                .strokeWidth(strokeWidth)
+                                .build());
+            }else{
+                mHeaderProgressBar.setIndeterminateDrawable(
+                        new SmoothProgressDrawable.Builder(mHeaderProgressBar.getContext())
+                                .color(mProgressDrawableColor)
+                                .sectionsCount(6)
+                                .separatorLength(0)
+                                .strokeWidth(strokeWidth)
+                                .build());
+            }
 
             ShapeDrawable shape = new ShapeDrawable();
             shape.setShape(new RectShape());
@@ -426,6 +448,7 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
         return Build.VERSION_CODES.ICE_CREAM_SANDWICH;
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     class HideAnimationCallback extends AnimatorListenerAdapter {
         @Override
         public void onAnimationEnd(Animator animation) {

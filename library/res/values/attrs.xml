@@ -40,6 +40,7 @@
 
         <!-- The color that the Progress Bar should be tinted with -->
         <attr name="ptrProgressBarColor" format="reference|color" />
+        <attr name="ptrProgressBarColorArray" format="reference" />
 
         <!-- The style of the Progress Bar -->
         <attr name="ptrProgressBarStyle">
