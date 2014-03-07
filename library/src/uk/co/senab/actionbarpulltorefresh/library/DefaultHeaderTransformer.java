@@ -137,7 +137,7 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
     }
 
     @Override
-    public void onPulled(float percentagePulled) {
+    public void onPulled(float percentagePulled, boolean fromBottom) {
         if (mHeaderProgressBar != null) {
             mHeaderProgressBar.setVisibility(View.VISIBLE);
             final float progress = mInterpolator.getInterpolation(percentagePulled);
@@ -157,7 +157,7 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
     }
 
     @Override
-    public void onReleaseToRefresh() {
+    public void onReleaseToRefresh(boolean fromBottom) {
         if (mHeaderTextView != null) {
             mHeaderTextView.setText(mReleaseLabel);
         }
@@ -386,7 +386,8 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
                                 .sectionsCount(6)
                                 .separatorLength(0)
                                 .strokeWidth(strokeWidth)
-                                .build());
+                                .build()
+                );
             }else{
                 mHeaderProgressBar.setIndeterminateDrawable(
                         new SmoothProgressDrawable.Builder(mHeaderProgressBar.getContext())

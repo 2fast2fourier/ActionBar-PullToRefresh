@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshFromBottomListener;
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 import uk.co.senab.actionbarpulltorefresh.library.viewdelegates.ViewDelegate;
 
@@ -40,6 +41,7 @@ public class ActionBarPullToRefresh {
         private int[] refreshableViewIds;
         private View[] refreshableViews;
         private OnRefreshListener mOnRefreshListener;
+        private OnRefreshFromBottomListener mOnRefreshFromBottomListener;
         private ViewGroup mViewGroupToInsertInto;
         private HashMap<Class, ViewDelegate> mViewDelegates;
 
@@ -83,6 +85,11 @@ public class ActionBarPullToRefresh {
             return this;
         }
 
+        public SetupWizard bottomListener(OnRefreshFromBottomListener listener){
+            mOnRefreshFromBottomListener = listener;
+            return this;
+        }
+
         public SetupWizard insertLayoutInto(ViewGroup viewGroup) {
             mViewGroupToInsertInto = viewGroup;
             return this;
@@ -92,6 +99,7 @@ public class ActionBarPullToRefresh {
             PullToRefreshAttacher attacher = pullToRefreshLayout.createPullToRefreshAttacher(
                     mActivity, mOptions);
             attacher.setOnRefreshListener(mOnRefreshListener);
+            attacher.setOnRefreshFromBottomListener(mOnRefreshFromBottomListener);
 
             if (mViewGroupToInsertInto != null) {
                 insertLayoutIntoViewGroup(mViewGroupToInsertInto, pullToRefreshLayout);

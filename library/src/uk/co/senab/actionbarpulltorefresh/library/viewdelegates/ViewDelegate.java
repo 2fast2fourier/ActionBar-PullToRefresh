@@ -37,4 +37,6 @@ public interface ViewDelegate {
      */
     public boolean isReadyForPull(View view, float x, float y);
 
+    public boolean isReadyForPullUp(View view, float x, float y);
+
 }

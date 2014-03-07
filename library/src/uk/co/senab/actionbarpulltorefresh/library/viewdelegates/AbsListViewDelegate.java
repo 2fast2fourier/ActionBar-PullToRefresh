@@ -87,4 +87,10 @@ public class AbsListViewDelegate implements ViewDelegate {
             return absListView.isFastScrollAlwaysVisible();
         }
     }
+
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+    @Override
+    public boolean isReadyForPullUp(View view, float x, float y) {
+        return !view.canScrollVertically(1);
+    }
 }

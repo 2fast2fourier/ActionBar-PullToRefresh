@@ -16,6 +16,8 @@
 
 package uk.co.senab.actionbarpulltorefresh.library.viewdelegates;
 
+import android.annotation.TargetApi;
+import android.os.Build;
 import android.view.View;
 import android.webkit.WebView;
 
@@ -29,5 +31,11 @@ public class WebViewDelegate implements ViewDelegate {
     @Override
     public boolean isReadyForPull(View view, float x, float y) {
         return view.getScrollY() <= 0;
+    }
+
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+    @Override
+    public boolean isReadyForPullUp(View view, float x, float y) {
+        return !view.canScrollVertically(1);
     }
 }

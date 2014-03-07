@@ -50,8 +50,9 @@ public abstract class HeaderTransformer {
      *
      * @param percentagePulled value between 0.0f and 1.0f depending on how far the
      *                         user has pulled.
+     * @param mCurrentPullIsUp
      */
-    public void onPulled(float percentagePulled) {}
+    public void onPulled(float percentagePulled, boolean mCurrentPullIsUp) {}
 
     /**
      * Called when a refresh has begun. Theoretically this call is similar
@@ -64,8 +65,9 @@ public abstract class HeaderTransformer {
      * Called when a refresh can be initiated when the user ends the touch
      * event. This is only called when {@link Options#refreshOnUp} is set to
      * true.
+     * @param mCurrentPullIsUp
      */
-    public void onReleaseToRefresh() {}
+    public void onReleaseToRefresh(boolean mCurrentPullIsUp) {}
 
     /**
      * Called when the current refresh has taken longer than the time
