@@ -168,6 +168,14 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
             if(pullFromBottom && !headerMoreLikeFooter){
                 RelativeLayout.LayoutParams header = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, mContentLayoutHeight);
                 header.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+                    //THIS IS A TERRIBLE HACK.
+                    //with translucent status bar enabled but translucent nav bar disabled,
+                    //the decor view extends halfway into the bottom navigation bar anyways
+                    //AND I DONT KNOW WHY
+                    //i've wasted hours on this bullshit, fuck it. this whole PTN is a hackjob.
+                    header.bottomMargin = (int) (mContentLayoutHeight*0.5f)-4;
+                }
                 mContentLayout.setLayoutParams(header);
                 RelativeLayout.LayoutParams progress = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                 progress.addRule(RelativeLayout.ABOVE, R.id.ptr_content);

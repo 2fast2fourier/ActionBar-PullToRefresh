@@ -344,13 +344,18 @@ public class PullToRefreshAttacher {
                 ViewDelegate delegate = mRefreshableViews.get(view);
                 if (delegate != null) {
                     // Now call the delegate, converting the X/Y into the View's co-ordinate system
-                    if(mOnPullFromBottomListener != null){
+                    if(mOnPullFromBottomListener != null && mOnRefreshListener != null){
                         mCanPullUp = delegate.isReadyForPullUp(view, rawX - mRect.left, rawY - mRect.top);
                         mCanPullDown = delegate.isReadyForPull(view, rawX - mRect.left, rawY - mRect.top);
                         return mCanPullUp || mCanPullDown;
-                    }else{
+                    }else if(mOnRefreshListener != null){
                         mCanPullDown = delegate.isReadyForPull(view, rawX - mRect.left, rawY - mRect.top);
+                        mCanPullUp = false;
                         return mCanPullDown;
+                    }else if(mOnPullFromBottomListener != null){
+                        mCanPullUp = delegate.isReadyForPullUp(view, rawX - mRect.left, rawY - mRect.top);
+                        mCanPullDown = false;
+                        return mCanPullUp;
                     }
                 }
             }
