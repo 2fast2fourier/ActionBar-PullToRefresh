@@ -452,7 +452,6 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
                                 .strokeWidth(strokeWidth)
                                 .sectionsCount(6)
                                 .separatorLength(0)
-                                .mirrorMode(true)
                                 .build());
             }else{
                 mHeaderProgressBar.setIndeterminateDrawable(
@@ -461,7 +460,6 @@ public class DefaultHeaderTransformer extends HeaderTransformer {
                                 .strokeWidth(strokeWidth)
                                 .sectionsCount(6)
                                 .separatorLength(0)
-                                .mirrorMode(true)
                                 .build());
             }
 
