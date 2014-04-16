@@ -529,9 +529,16 @@ public class PullToRefreshAttacher {
 
     private boolean checkScrollForRefresh(View view) {
         if (mIsBeingDragged && mRefreshOnUp && view != null) {
-            if (mLastMotionY - mPullBeginY >= getScrollNeededForRefresh(view)) {
-                setRefreshingInt(view, true, true);
-                return true;
+            if(mCurrentPullIsUp){
+                if (mPullBeginY - mLastMotionY >= getScrollNeededForRefresh(view)) {
+                    setRefreshingInt(view, true, true);
+                    return true;
+                }
+            }else{
+                if (mLastMotionY - mPullBeginY >= getScrollNeededForRefresh(view)) {
+                    setRefreshingInt(view, true, true);
+                    return true;
+                }
             }
         }
         return false;
